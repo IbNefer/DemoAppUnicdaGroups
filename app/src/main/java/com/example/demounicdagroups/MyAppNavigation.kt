@@ -1,5 +1,6 @@
 package com.example.demounicdagroups
 
+import SplashScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -13,7 +14,12 @@ import com.example.demounicdagroups.pages.SignupPage
 fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController,
+        startDestination = "splash"
+    ) {
+        composable("splash") {
+            SplashScreen(navController = navController)
+        }
         composable(route = "login") {
             LoginPage(modifier, navController, authViewModel)
         }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "793737403217",
+    "project_id": "demounicdagroups",
+    "storage_bucket": "demounicdagroups.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793737403217:android:aae9956e7a2f16f4d69170",
+        "android_client_info": {
+          "package_name": "com.example.demounicdagroups"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "793737403217-pilbjjhgkgaiic3c8kbpm1chsolurn4g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.demounicdagroups",
+            "certificate_hash": "0f7e8462b4f96da175d36e6d358e272268e37219"
+          }
+        },
+        {
+          "client_id": "793737403217-4qormmt9jqst3mhfsq6c16dd05pa0e1u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcT6T19e9IcAfTJC19-7CVFH_silKf8UA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "793737403217-4qormmt9jqst3mhfsq6c16dd05pa0e1u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
