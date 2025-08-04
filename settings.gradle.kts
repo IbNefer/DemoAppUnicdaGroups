@@ -11,13 +11,16 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
+    // ✅ NO versionCatalogs block needed here
 }
 
 rootProject.name = "DemoUnicdaGroups"
+
 include(":app")

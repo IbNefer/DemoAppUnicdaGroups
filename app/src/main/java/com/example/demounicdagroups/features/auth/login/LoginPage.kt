@@ -1,11 +1,13 @@
-package com.example.demounicdagroups.pages
+package com.example.demounicdagroups.features.auth.login
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -23,11 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.demounicdagroups.AuthState
-import com.example.demounicdagroups.AuthViewModel
+import com.example.demounicdagroups.features.auth.signup.AuthState
+import com.example.demounicdagroups.features.auth.signup.AuthViewModel
 import com.example.demounicdagroups.R
 
 @Composable
@@ -58,6 +61,13 @@ fun LoginPage(modifier: Modifier, navController: NavHostController, AuthViewMode
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+
+        Image(
+            painter = painterResource(id = R.drawable.unicda),
+            contentDescription = "algo",
+            modifier = Modifier.size(150.dp)
+        )
+
         Text(text = "Login", fontSize =  32.sp, color = colorResource(id = R.color.dark_blue))
         Spacer(modifier = Modifier.height(16.dp))
 

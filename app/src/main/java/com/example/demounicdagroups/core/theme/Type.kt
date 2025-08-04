@@ -1,4 +1,4 @@
-package com.example.demounicdagroups.ui.theme
+package com.example.demounicdagroups.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
