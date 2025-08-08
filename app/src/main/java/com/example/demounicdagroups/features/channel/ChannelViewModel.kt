@@ -1,4 +1,4 @@
-package com.example.demounicdagroups.features.chat
+package com.example.demounicdagroups.features.channel
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase

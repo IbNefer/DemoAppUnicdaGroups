@@ -28,33 +28,35 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.demounicdagroups.features.auth.signup.AuthState
 import com.example.demounicdagroups.features.auth.signup.AuthViewModel
 import com.example.demounicdagroups.R
 
 @Composable
-fun LoginPage(modifier: Modifier, navController: NavHostController, AuthViewModel: AuthViewModel) {
-    var email by remember {
-        mutableStateOf("")
-    }
+fun LoginPage(modifier: Modifier, navController: NavHostController) {
+    val authViewModel: AuthViewModel = hiltViewModel()
 
-    var password by remember{
-        mutableStateOf("")
-    }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    val authState = AuthViewModel.authState.observeAsState()
+    val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
 
     LaunchedEffect(authState.value) {
-        when(authState.value){
-            is AuthState.Authenticated -> navController.navigate("home")
-            is AuthState.Error -> Toast.makeText(context,
-                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+        when (val state = authState.value) {
+            is AuthState.Authenticated -> {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+            is AuthState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
             else -> Unit
         }
     }
-
 
     Column (
         modifier = modifier.fillMaxSize(),
@@ -92,12 +94,12 @@ fun LoginPage(modifier: Modifier, navController: NavHostController, AuthViewMode
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            AuthViewModel.login(email, password)
+            authViewModel.login(email, password)
         },
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_blue),
                 contentColor = Color.White
             ),
-            enabled = authState.value != AuthState.Loading
+            enabled = authState.value !is AuthState.Loading
         ) {
             Text(text = "Login")
         }

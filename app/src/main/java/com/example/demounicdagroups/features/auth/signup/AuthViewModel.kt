@@ -41,10 +41,11 @@ class AuthViewModel(): ViewModel(){
             return
         }
 
+        _authState.value = AuthState.Loading // <- add this here
+
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Pass the user object after successful login
                     _authState.value = AuthState.Authenticated(auth.currentUser!!)
                 } else {
                     _authState.value =

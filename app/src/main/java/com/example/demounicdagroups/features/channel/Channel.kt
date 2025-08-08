@@ -1,4 +1,4 @@
-package com.example.demounicdagroups.features.chat
+package com.example.demounicdagroups.features.channel
 
 data class Channel (
     val id: String,

@@ -1,5 +1,6 @@
 package com.example.demounicdagroups.features.home
 
+import android.R.attr.onClick
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.demounicdagroups.features.auth.signup.AuthState
 import com.example.demounicdagroups.features.auth.signup.AuthViewModel
@@ -47,11 +49,11 @@ fun HomePage(
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf(false) }
 
-
     LaunchedEffect(authState) {
-        when (authState) {
-            is AuthState.Unauthenticated -> navController.navigate("login")
-            else -> Unit
+        if (authState is AuthState.Unauthenticated) {
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
         }
     }
 
@@ -97,6 +99,9 @@ fun HomePage(
                         tint = Color.Blue,
                         contentDescription = "Ícono de Usuario",
                         modifier = Modifier.align(Alignment.CenterEnd)
+                            .clickable{
+                                navController.navigate("profile")
+                            }
                     )
                 }
 
@@ -124,7 +129,9 @@ fun HomePage(
             }
 
             item {
-                TextButton(onClick = { authViewModel.signout() }) {
+                TextButton(onClick = {
+                    authViewModel.signout()
+                }) {
                     Text(text = "Sign out...")
                 }
             }
