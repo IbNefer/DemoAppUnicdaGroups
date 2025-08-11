@@ -68,7 +68,7 @@ class GroupViewModel @Inject constructor(
             "name" to name,
             "courseCode" to courseCode,
             "groupDetail" to groupDetail,
-            "memberCount" to 1,
+            "memberCount" to 0,
             "creatorUid" to currentUser.uid,
             "creatorName" to currentUser.displayName,
             "createdAt" to FieldValue.serverTimestamp()

@@ -6,167 +6,229 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import com.example.demounicdagroups.R
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.demounicdagroups.core.theme.Blueberry
-import com.example.demounicdagroups.core.theme.Blueish
-import com.example.demounicdagroups.core.theme.LightGreen
+import com.example.demounicdagroups.features.group.GroupViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navController: NavController, channelId: String){
+fun ChatScreen(navController: NavController, channelId: String) {
+    val chatViewModel: ChatViewModel = hiltViewModel()
+    val groupsViewModel: GroupViewModel = hiltViewModel()
+
+    val allGroups by groupsViewModel.groups.collectAsState()
+
+    val groupInfo = remember(allGroups, channelId) {
+        allGroups.find { it.id == channelId }
+    }
+
+    LaunchedEffect(key1 = channelId) {
+        chatViewModel.listenForMessages(channelId)
+    }
+
+    val messages by chatViewModel.message.collectAsState()
 
     Scaffold(
-        containerColor = Color.LightGray
-    ){
-        Column (
-            modifier = Modifier.fillMaxSize().padding(it)
-        ){
-            val viewModel: ChatViewModel = hiltViewModel()
-            LaunchedEffect(key1 = true) {
-                viewModel.listenForMessages(channelId)
+        topBar = {
+            TopAppBar(
+                title = { Text(groupInfo?.name ?: "Chat") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { paddingValues ->
+        ChatMessages(
+            modifier = Modifier.padding(paddingValues),
+            messages = messages,
+            onSendMessage = { message ->
+                chatViewModel.sendMessage(channelId, message)
+            }
+        )
+    }
+}
+@Composable
+fun ChannelItem(channelName: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Text(
+                    text = channelName.firstOrNull()?.uppercase() ?: "",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
 
-            val messages = viewModel.message.collectAsState()
+            Spacer(modifier = Modifier.width(16.dp))
 
-            ChatMessages(
-                messages = messages.value,
-                onSendMessage = {message ->
-                    viewModel.sendMessage(channelId, message)
-                }
+            Text(
+                text = channelName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
 }
-
-@Composable
-fun ChannelItem(channelName: String, onClick: ()-> Unit){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Blueish)
-            .clickable{
-            onClick()
-        },
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        Box(
-            modifier = Modifier
-                .padding(8.dp)
-                .size(70.dp)
-                .clip(CircleShape)
-                .background(Color.Yellow.copy(alpha = 0.3f))
-        ){
-            Text(
-                text = channelName[0].uppercase(),
-                color = Color.White,
-                style = TextStyle(fontSize = 35.sp),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center))
-        }
-
-        Text(
-            text = channelName,
-            modifier = Modifier
-                .padding(8.dp)
-        )
-    }
-}
-
 @Composable
 fun ChatMessages(
-  messages: List<Message>,
-  onSendMessage: (String) -> Unit,
-){
-    val hideKeyboardController = LocalSoftwareKeyboardController.current
+    modifier: Modifier = Modifier,
+    messages: List<Message>,
+    onSendMessage: (String) -> Unit,
+) {
+    val listState = rememberLazyListState()
 
-    val msg = remember {
-        mutableStateOf("")
+    LaunchedEffect(messages) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
     }
 
-    Box(
-        modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxSize()
-    ){
-        LazyColumn {
-            items(messages){message ->
+            .imePadding()
+    ) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(messages) { message ->
                 ChatBubble(message = message)
             }
         }
 
-        Row (
-            modifier = Modifier.fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .background(Color.LightGray),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ){
-            TextField(
-                value = msg.value,
-                onValueChange = {
-                    msg.value= it
-                },
+        // The message input field at the bottom.
+        MessageInput(onSendMessage = onSendMessage)
+    }
+}
+
+@Composable
+fun MessageInput(onSendMessage: (String) -> Unit) {
+    var message by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shadowElevation = 8.dp // Adds a nice shadow above the input field.
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = message,
+                onValueChange = { message = it },
                 modifier = Modifier.weight(1f),
-                placeholder = {Text(text = "Type a message")} ,
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        hideKeyboardController?.hide()
+                placeholder = { Text("Type a message...") },
+                shape = RoundedCornerShape(24.dp),
+                keyboardActions = KeyboardActions(onSend = {
+                    if (message.isNotBlank()) {
+                        onSendMessage(message)
+                        message = ""
+                        keyboardController?.hide()
                     }
-                )
+                }),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send)
             )
 
-            IconButton(onClick = {
-                onSendMessage(msg.value)
-                msg.value = ""
-            }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "send")
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = {
+                    if (message.isNotBlank()) {
+                        onSendMessage(message)
+                        message = ""
+                    }
+                },
+                enabled = message.isNotBlank()
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
 }
-
 @Composable
 fun ChatBubble(message: Message) {
     val isCurrentUser = message.senderId == Firebase.auth.currentUser?.uid

@@ -69,7 +69,6 @@ fun HomePage(
         ) {
             val currentUserUid = authViewModel.getCurrentUser()?.uid
 
-            // Header content goes inside a single item() block
             item {
                 Box(
                     modifier = Modifier

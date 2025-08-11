@@ -46,13 +46,13 @@ fun CreateGroup(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background // Color de fondo del tema
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp) // Aumentamos el padding general
-                .verticalScroll(rememberScrollState()), // Permite el scroll en pantallas pequeñas
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Un título más prominente
@@ -70,7 +70,7 @@ fun CreateGroup(
                 onValueChange = { name = it },
                 label = { Text("Nombre del Grupo") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp), // Esquinas redondeadas
+                shape = RoundedCornerShape(16.dp),
                 leadingIcon = {
                     Icon(Icons.Outlined.Person, contentDescription = "Group Name Icon")
                 }
@@ -97,7 +97,7 @@ fun CreateGroup(
                 label = { Text("Detalles") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp), // Más alto para más texto
+                    .height(120.dp),
                 shape = RoundedCornerShape(16.dp),
                 leadingIcon = {
                     Icon(Icons.Outlined.Info, contentDescription = "Details Icon")
@@ -109,7 +109,7 @@ fun CreateGroup(
             Button(
                 onClick = {
                     groupsViewModel.createGroup(name, courseCode, details)
-                    chatViewModel.addChannel(courseCode)
+                    chatViewModel.addChannel(name = name)
                     navController.popBackStack()
                 },
                 modifier = Modifier
