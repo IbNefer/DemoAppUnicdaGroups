@@ -62,7 +62,6 @@ fun HomePage(
 
     Box(modifier = modifier.fillMaxSize()) {
 
-        // The LazyColumn is the single scrollable container for the whole screen
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally

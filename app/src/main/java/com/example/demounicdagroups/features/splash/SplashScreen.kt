@@ -59,7 +59,7 @@ fun Splash() {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.unicda),
+            painter = painterResource(id = R.drawable.unicda_group),
             contentDescription = "App Logo",
             modifier = Modifier.size(200.dp)
         )

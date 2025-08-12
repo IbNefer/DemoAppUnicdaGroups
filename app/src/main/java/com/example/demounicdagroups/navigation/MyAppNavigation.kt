@@ -17,6 +17,7 @@ import com.example.demounicdagroups.features.auth.login.LoginPage
 import com.example.demounicdagroups.features.notification.NotificationPage
 import com.example.demounicdagroups.features.auth.signup.SignupPage
 import com.example.demounicdagroups.features.chat.ChatScreen
+import com.example.demounicdagroups.features.profile.ProfileUser
 
 
 data class BottomNavItem(
@@ -58,6 +59,9 @@ fun MyAppNavigation(
         }
         composable (route= "createGroup"){
             CreateGroup(navController = navController)
+        }
+        composable (route= "profile"){
+            ProfileUser(navController = navController)
         }
         composable("chat/{channelId}", arguments = listOf(
             navArgument("channelId"){
