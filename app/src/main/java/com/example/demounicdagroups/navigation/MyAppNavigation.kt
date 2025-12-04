@@ -9,14 +9,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.demounicdagroups.features.auth.signup.AuthViewModel
-import com.example.demounicdagroups.features.channel.ChatPage
+import com.example.demounicdagroups.features.auth.AuthViewModel
 import com.example.demounicdagroups.features.group.CreateGroup
 import com.example.demounicdagroups.features.home.HomePage
 import com.example.demounicdagroups.features.auth.login.LoginPage
 import com.example.demounicdagroups.features.notification.NotificationPage
 import com.example.demounicdagroups.features.auth.signup.SignupPage
-import com.example.demounicdagroups.features.chat.ChatScreen
+import com.example.demounicdagroups.features.channel.ChannelPage
+import com.example.demounicdagroups.features.chat.ChatPage
 import com.example.demounicdagroups.features.profile.ProfileUser
 
 
@@ -33,7 +33,7 @@ data class BottomNavItem(
 @Composable
 fun MyAppNavigation(
     modifier: Modifier,
-    navController: NavHostController, // <-- ACCEPT it as a parameter
+    navController: NavHostController,
     authViewModel: AuthViewModel
 ) {
     NavHost(navController = navController,
@@ -46,13 +46,13 @@ fun MyAppNavigation(
             LoginPage(modifier, navController)
         }
         composable(route = "signup") {
-            SignupPage(modifier, navController, authViewModel)
+            SignupPage(modifier, navController)
         }
         composable(route = "home") {
             HomePage(modifier, navController)
         }
         composable(route = "chat") {
-            ChatPage(modifier, navController)
+            ChannelPage(modifier, navController)
         }
         composable (route = "notifications"){
             NotificationPage(modifier)
@@ -69,7 +69,7 @@ fun MyAppNavigation(
             }
         ) ) {
             val channelId = it.arguments?.getString("channelId") ?: " "
-            ChatScreen(navController, channelId)
+            ChatPage(navController, channelId)
         }
     }
 }

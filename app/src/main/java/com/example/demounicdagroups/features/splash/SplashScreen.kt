@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.demounicdagroups.R
-import com.example.demounicdagroups.features.auth.signup.AuthState
-import com.example.demounicdagroups.features.auth.signup.AuthViewModel
+import com.example.demounicdagroups.features.auth.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -54,7 +53,7 @@ fun Splash() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.white)), // Chained modifier
+            .background(color = colorResource(id = R.color.white)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

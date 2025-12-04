@@ -16,12 +16,13 @@ import androidx.compose.runtime.setValue
 
 
 @Composable
-fun SearchBar(){
-    var searchText by remember { mutableStateOf("") }
-
+fun SearchBar(
+    searchText: String,
+    onSearchTextChange: (String) -> Unit
+){
     OutlinedTextField(
         value = searchText,
-        onValueChange = {searchText = it},
+        onValueChange = onSearchTextChange,
         modifier = Modifier.fillMaxWidth(),
         placeholder = { Text("Search for groups...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },

@@ -21,15 +21,18 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.demounicdagroups.features.auth.signup.AuthViewModel
 import com.example.demounicdagroups.core.theme.DemoUnicdaGroupsTheme
+import com.example.demounicdagroups.features.auth.AuthViewModel
+import com.example.demounicdagroups.features.auth.login.LoginViewModel
 import com.example.demounicdagroups.navigation.BottomNavItem
 import com.example.demounicdagroups.navigation.MyAppNavigation
 import com.google.firebase.FirebaseApp
@@ -41,22 +44,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
-        val authViewModel: AuthViewModel by viewModels() // This line creates the ViewModel
+        val authViewModel: AuthViewModel by viewModels()
+        val loginViewModel: LoginViewModel by viewModels()
 
         setContent {
             DemoUnicdaGroupsTheme {
 
-                // Step 1: Create the NavController here
+                val authState by authViewModel.authState.observeAsState()
+
+                LaunchedEffect(authState) {
+                    if (authState is AuthState.Authenticated) {
+                        loginViewModel.updateFcmToken()
+                    }
+                }
+
                 val navController = rememberNavController()
 
-                // Step 2: Get the current route to determine visibility
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
-                // Step 3: Define which screens should show the bottom bar
                 val bottomBarVisible = when (currentDestination?.route) {
-                    "home", "chat", "notifications" -> true // Add all routes that need the bar
-                    else -> false // Hide on "login", "signup", "splashscreen", etc.
+                    "home", "chat", "notifications" -> true
+                    else -> false
                 }
 
                 val items = listOf(

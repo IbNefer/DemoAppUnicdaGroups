@@ -1,6 +1,5 @@
 package com.example.demounicdagroups.features.home
 
-import android.R.attr.onClick
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,27 +26,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.example.demounicdagroups.features.auth.signup.AuthState
-import com.example.demounicdagroups.features.auth.signup.AuthViewModel
 import com.example.demounicdagroups.core.components.SearchBar
 import com.example.demounicdagroups.core.components.ClickableCard
 import com.example.demounicdagroups.features.group.GroupDetailsDialog
-import com.example.demounicdagroups.features.group.GroupInfo
+import com.example.demounicdagroups.Data.GroupInfo
 import com.example.demounicdagroups.features.group.GroupViewModel
 import com.example.demounicdagroups.core.theme.Blue1
+import com.example.demounicdagroups.features.auth.AuthViewModel
+import com.example.demounicdagroups.features.notification.RequestNotificationPermissionDialog
 
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     groupsViewModel: GroupViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
+    RequestNotificationPermissionDialog()
     val authState by authViewModel.authState.observeAsState()
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Unauthenticated) {
@@ -59,6 +60,16 @@ fun HomePage(
 
     var selectedGroup by remember { mutableStateOf<GroupInfo?>(null) }
     val studyGroups by groupsViewModel.groups.collectAsState()
+
+    val filteredGroups = remember(searchText, studyGroups) {
+        if (searchText.isBlank()) {
+            studyGroups
+        } else {
+            studyGroups.filter { group ->
+                group.name.contains(searchText, ignoreCase = true)
+            }
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
 
@@ -106,13 +117,16 @@ fun HomePage(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    SearchBar()
+                    SearchBar(
+                        searchText = searchText,
+                        onSearchTextChange = { newText -> searchText = newText }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            items(studyGroups) { group ->
+            items(filteredGroups) { group ->
                 val isJoined = group.members.contains(currentUserUid)
 
                 ClickableCard(

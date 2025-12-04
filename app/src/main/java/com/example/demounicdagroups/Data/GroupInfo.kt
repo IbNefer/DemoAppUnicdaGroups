@@ -1,4 +1,4 @@
-package com.example.demounicdagroups.features.group
+package com.example.demounicdagroups.Data
 
 import androidx.annotation.DrawableRes
 import com.example.demounicdagroups.R

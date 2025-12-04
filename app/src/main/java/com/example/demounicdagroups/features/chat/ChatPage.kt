@@ -1,6 +1,5 @@
 package com.example.demounicdagroups.features.chat
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,13 +58,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.demounicdagroups.Data.Message
 import com.example.demounicdagroups.features.group.GroupViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navController: NavController, channelId: String) {
+fun ChatPage(navController: NavController, channelId: String) {
     val chatViewModel: ChatViewModel = hiltViewModel()
     val groupsViewModel: GroupViewModel = hiltViewModel()
 
@@ -233,7 +235,6 @@ fun MessageInput(onSendMessage: (String) -> Unit) {
 fun ChatBubble(message: Message) {
     val isCurrentUser = message.senderId == Firebase.auth.currentUser?.uid
 
-    // Define colors from your app's theme for a consistent look
     val bubbleColor = if (isCurrentUser) {
         MaterialTheme.colorScheme.primary
     } else {
@@ -254,8 +255,12 @@ fun ChatBubble(message: Message) {
         horizontalArrangement = horizontalArrangement,
         verticalAlignment = Alignment.Top
     ) {
+
         if (!isCurrentUser) {
-            ProfileImage(modifier = Modifier.padding(end = 8.dp))
+            ProfileImage(
+                imageUrl = message.senderProfileUrl,
+                modifier = Modifier.padding(end = 8.dp)
+            )
         }
 
         Column {
@@ -282,20 +287,35 @@ fun ChatBubble(message: Message) {
             )
         }
 
-        // For outgoing messages, show the picture on the right
+
         if (isCurrentUser) {
-            ProfileImage(modifier = Modifier.padding(start = 8.dp))
+            ProfileImage(
+                imageUrl = message.senderProfileUrl,
+                modifier = Modifier.padding(start = 8.dp)
+            )
         }
     }
 }
 
 @Composable
-private fun ProfileImage(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(id = R.drawable.gatito),
+fun ProfileImage(
+    imageUrl: String?, // Recibimos la URL desde Firestore
+    modifier: Modifier = Modifier
+) {
+    val model = if (imageUrl.isNullOrBlank()) {
+        R.drawable.gatito // Si no hay URL, usa tu gatito por defecto
+    } else {
+        imageUrl // Si hay URL, úsala
+    }
+
+    AsyncImage(
+        model = model,
         contentDescription = "Profile picture",
         modifier = modifier
             .size(40.dp)
-            .clip(CircleShape)
+            .clip(CircleShape),
+        contentScale = ContentScale.Crop, // Importante para que la imagen llene el círculo bien
+        placeholder = painterResource(R.drawable.gatito), // Muestra el gatito mientras carga
+        error = painterResource(R.drawable.gatito) // Muestra el gatito si falla la carga
     )
 }

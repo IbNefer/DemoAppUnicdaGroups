@@ -38,7 +38,6 @@ import com.example.demounicdagroups.features.channel.ChannelViewModel
 fun CreateGroup(
     navController: NavController,
     groupsViewModel: GroupViewModel = hiltViewModel(),
-    chatViewModel: ChannelViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
     var courseCode by remember { mutableStateOf("") }
@@ -109,7 +108,6 @@ fun CreateGroup(
             Button(
                 onClick = {
                     groupsViewModel.createGroup(name, courseCode, details)
-                    chatViewModel.addChannel(name = name)
                     navController.popBackStack()
                 },
                 modifier = Modifier

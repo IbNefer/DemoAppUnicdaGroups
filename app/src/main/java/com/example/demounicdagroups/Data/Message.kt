@@ -1,11 +1,10 @@
-package com.example.demounicdagroups.features.chat
+package com.example.demounicdagroups.Data
 
-data class Message (
+data class Message(
     val id: String = "",
     val senderId: String = "",
     val message: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val senderName: String = "",
-    val senderImgae: String? = null,
-    val imageUrl: String? = null
+    val senderProfileUrl: String? = null
 )
