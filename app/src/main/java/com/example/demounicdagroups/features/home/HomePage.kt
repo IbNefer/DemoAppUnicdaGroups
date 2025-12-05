@@ -10,7 +10,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -140,13 +139,6 @@ fun HomePage(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            item {
-                TextButton(onClick = {
-                    authViewModel.signout()
-                }) {
-                    Text(text = "Sign out...")
-                }
-            }
         }
 
         selectedGroup?.let { group ->

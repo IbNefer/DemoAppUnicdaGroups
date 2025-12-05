@@ -1,5 +1,9 @@
 package com.example.demounicdagroups.features.chat
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -98,12 +104,20 @@ fun ChatPage(navController: NavController, channelId: String) {
                 )
             )
         }
-    ) { paddingValues ->
+    ){ paddingValues ->
+
         ChatMessages(
             modifier = Modifier.padding(paddingValues),
             messages = messages,
-            onSendMessage = { message ->
-                chatViewModel.sendMessage(channelId, message)
+
+            // CONEXIÓN 1: Texto
+            onSendMessage = { text ->
+                chatViewModel.sendMessage(channelId, text)
+            },
+
+            // CONEXIÓN 2: Imagen
+            onSendImage = { uri ->
+                chatViewModel.sendMediaMessage(channelId, uri)
             }
         )
     }
@@ -150,6 +164,7 @@ fun ChatMessages(
     modifier: Modifier = Modifier,
     messages: List<Message>,
     onSendMessage: (String) -> Unit,
+    onSendImage: (Uri) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -175,19 +190,32 @@ fun ChatMessages(
             }
         }
 
-        // The message input field at the bottom.
-        MessageInput(onSendMessage = onSendMessage)
+        MessageInput(
+            onSendMessage = onSendMessage,
+            onSendImage = onSendImage
+        )
     }
 }
 
 @Composable
-fun MessageInput(onSendMessage: (String) -> Unit) {
+fun MessageInput(
+    onSendMessage: (String) -> Unit,
+    onSendImage: (Uri) -> Unit // <--- Nuevo callback
+) {
     var message by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            onSendImage(uri)
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shadowElevation = 8.dp // Adds a nice shadow above the input field.
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
@@ -195,6 +223,21 @@ fun MessageInput(onSendMessage: (String) -> Unit) {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = {
+                galleryLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Photo",
+                    tint = Color.Gray
+                )
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // --- Campo de Texto (Igual que antes) ---
             OutlinedTextField(
                 value = message,
                 onValueChange = { message = it },
@@ -256,6 +299,7 @@ fun ChatBubble(message: Message) {
         verticalAlignment = Alignment.Top
     ) {
 
+        // Foto de perfil (Izquierda)
         if (!isCurrentUser) {
             ProfileImage(
                 imageUrl = message.senderProfileUrl,
@@ -263,7 +307,10 @@ fun ChatBubble(message: Message) {
             )
         }
 
-        Column {
+        // --- COLUMNA DE CONTENIDO (Nombre + Burbuja) ---
+        Column(horizontalAlignment = if (isCurrentUser) Alignment.End else Alignment.Start) {
+
+            // Nombre del remitente
             if (!isCurrentUser) {
                 Text(
                     text = message.senderName,
@@ -274,20 +321,38 @@ fun ChatBubble(message: Message) {
                 )
             }
 
-            // The message bubble itself
-            Text(
-                text = message.message.trim(),
-                color = textColor,
+            // --- LA BURBUJA (Puede tener Imagen + Texto) ---
+            Column(
                 modifier = Modifier
+                    .widthIn(max = 280.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(bubbleColor)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    // Constrain the width so long messages wrap nicely
-                    .widthIn(max = 280.dp)
-            )
+            ) {
+                // 1. IMAGEN (Si existe)
+                if (message.imageUrl != null) {
+                    AsyncImage(
+                        model = message.imageUrl,
+                        contentDescription = "Sent image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 250.dp) // Límite de altura para que no sea gigante
+                            .clip(RoundedCornerShape(16.dp)), // Redondeamos la imagen también
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                // 2. TEXTO (Si existe)
+                if (message.message.isNotEmpty()) {
+                    Text(
+                        text = message.message.trim(),
+                        color = textColor,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
         }
 
-
+        // Foto de perfil (Derecha)
         if (isCurrentUser) {
             ProfileImage(
                 imageUrl = message.senderProfileUrl,
@@ -299,13 +364,13 @@ fun ChatBubble(message: Message) {
 
 @Composable
 fun ProfileImage(
-    imageUrl: String?, // Recibimos la URL desde Firestore
+    imageUrl: String?,
     modifier: Modifier = Modifier
 ) {
     val model = if (imageUrl.isNullOrBlank()) {
-        R.drawable.gatito // Si no hay URL, usa tu gatito por defecto
+        R.drawable.gatito
     } else {
-        imageUrl // Si hay URL, úsala
+        imageUrl
     }
 
     AsyncImage(
@@ -314,8 +379,8 @@ fun ProfileImage(
         modifier = modifier
             .size(40.dp)
             .clip(CircleShape),
-        contentScale = ContentScale.Crop, // Importante para que la imagen llene el círculo bien
-        placeholder = painterResource(R.drawable.gatito), // Muestra el gatito mientras carga
-        error = painterResource(R.drawable.gatito) // Muestra el gatito si falla la carga
+        contentScale = ContentScale.Crop,
+        placeholder = painterResource(R.drawable.gatito),
+        error = painterResource(R.drawable.gatito)
     )
 }

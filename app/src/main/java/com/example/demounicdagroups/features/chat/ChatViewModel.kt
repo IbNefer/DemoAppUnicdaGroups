@@ -11,6 +11,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -73,5 +74,44 @@ class ChatViewModel @Inject constructor(): ViewModel() {
                     _messages.value = list
                 }
             }
+    }
+
+    private val storage = Firebase.storage
+
+    fun sendMediaMessage(channelId: String, uri: android.net.Uri, caption: String = "") {
+        val currentUser = auth.currentUser
+        val uid = currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            try {
+                val userDoc = firestore.collection("users").document(uid).get().await()
+                val userName = userDoc.getString("name") ?: "Usuario"
+                val userPhotoUrl = userDoc.getString("profileImageUrl")
+
+                val imageRef = storage.reference.child("chat_media/${UUID.randomUUID()}")
+
+                imageRef.putFile(uri).await()
+
+                val downloadUrl = imageRef.downloadUrl.await().toString()
+
+                val newMessage = Message(
+                    id = UUID.randomUUID().toString(),
+                    senderId = uid,
+                    senderName = userName,
+                    message = caption, // Texto opcional
+                    createdAt = System.currentTimeMillis(),
+                    senderProfileUrl = userPhotoUrl,
+                    imageUrl = downloadUrl
+                )
+
+                firestore.collection("groups").document(channelId)
+                    .collection("messages")
+                    .add(newMessage)
+                    .await()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

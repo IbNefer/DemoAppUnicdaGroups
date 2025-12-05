@@ -1,4 +1,4 @@
-package com.example.demounicdagroups.Data.Remote
+package com.example.demounicdagroups.Data.Services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
